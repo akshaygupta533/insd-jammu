@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
-        
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             scroll-behavior: smooth;
@@ -17,32 +18,83 @@
         .glass-nav {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .floating-form {
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
         }
 
-        #form-status.hidden {
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+
+        #form-status.hidden,
+        #modal-form-status.hidden {
             display: none;
         }
 
-        /* Ensure images maintain aspect ratio on mobile */
         .course-card-img {
             aspect-ratio: 4/5;
             object-fit: cover;
         }
     </style>
 </head>
+
 <body class="bg-gray-50 text-gray-900">
+
+    <!-- Popup Modal -->
+    <div id="inquiry-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div
+            class="bg-white rounded-3xl p-8 max-w-lg w-full relative z-[101] shadow-2xl transform transition-all scale-100">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-black transition p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Start Your Design Journey</h3>
+                <p class="text-gray-500 mt-2">Fill this form to show your interest. We will get back to you at the
+                    earliest</p>
+            </div>
+            <form id="modal-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-4">
+                <input type="hidden" name="access_key" value="cc56a590-3dc9-42fb-b227-985e4dc02488">
+                <input type="hidden" name="subject" value="Popup Inquiry - INSD Jammu">
+                <input type="text" name="name" placeholder="Full Name" required
+                    class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="email" name="email" placeholder="Email Address" required
+                        class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                    <input type="tel" name="phone" placeholder="Phone Number" required
+                        class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+                <select name="course" required
+                    class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                    <option value="" disabled selected>Select Course Interest</option>
+                    <option value="Fashion">Fashion Design</option>
+                    <option value="Interior">Interior Design</option>
+                    <option value="Graphic">Graphic Design</option>
+                    <option value="Animation">Animation & VFX</option>
+                    <option value="Jewellery">Jewellery Design</option>
+                    <option value="Photography">Photography</option>
+                </select>
+                <button type="submit" id="modal-submit-btn"
+                    class="w-full bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-black transition shadow-lg shadow-red-200">
+                    Get Free Counseling
+                </button>
+                <div id="modal-form-status" class="hidden text-center p-3 rounded-lg text-sm"></div>
+            </form>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="glass-nav fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-2xl font-bold tracking-tighter text-black">INSD <span class="text-red-600">JAMMU</span></span>
+                    <span class="text-2xl font-bold tracking-tighter text-black">INSD <span
+                            class="text-red-600">JAMMU</span></span>
                 </div>
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex space-x-8 font-medium text-sm uppercase tracking-wider">
@@ -58,17 +110,25 @@
                         <i class="fa-solid fa-bars text-2xl"></i>
                     </button>
                 </div>
-                <a href="#home" class="hidden md:block bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-black transition text-sm">Apply Now</a>
+                <button onclick="document.getElementById('inquiry-modal').classList.remove('hidden')"
+                    class="hidden md:block bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-black transition text-sm">Apply
+                    Now</button>
             </div>
         </div>
         <!-- Mobile Menu Dropdown -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-xl">
+        <div id="mobile-menu"
+            class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-xl">
             <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="#home" class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Home</a>
-                <a href="#about" class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">About Us</a>
-                <a href="#courses" class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Courses</a>
-                <a href="#placements" class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Placements</a>
-                <a href="#contact" class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Contact</a>
+                <a href="#home"
+                    class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Home</a>
+                <a href="#about" class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">About
+                    Us</a>
+                <a href="#courses"
+                    class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Courses</a>
+                <a href="#placements"
+                    class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Placements</a>
+                <a href="#contact"
+                    class="mobile-link block py-3 text-gray-800 font-medium border-b border-gray-50">Contact</a>
             </div>
         </div>
     </nav>
@@ -76,36 +136,53 @@
     <!-- Hero Section -->
     <section id="home" class="relative pt-20 min-h-screen flex items-center overflow-hidden">
         <div class="absolute inset-0 bg-black/50 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=2000" class="absolute inset-0 w-full h-full object-cover" alt="Design Background">
-        
+        <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=2000"
+            class="absolute inset-0 w-full h-full object-cover" alt="Design Background">
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 grid md:grid-cols-2 gap-12 items-center py-12">
             <div class="text-white text-center md:text-left">
-                <span class="inline-block bg-red-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">Admissions Open 2026</span>
-                <h1 class="text-4xl md:text-7xl font-bold leading-tight mb-6">Shape Your Creative Destiny in Jammu.</h1>
-                <p class="text-base md:text-lg text-gray-200 mb-8 max-w-lg mx-auto md:mx-0">Join India's leading design institute. Industry-oriented curriculum, global exposure, and 100% placement assistance.</p>
-                <div class="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#courses" class="bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-red-600 hover:text-white transition text-center">Explore Courses</a>
-                    <a href="#contact" class="border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-black transition text-center">Contact Us</a>
+                <span
+                    class="inline-block bg-red-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">Admissions
+                    Open 2026</span>
+                <h1 class="text-4xl md:text-7xl font-bold leading-tight mb-6">Begin in Jammu. Design for the World.</h1>
+                <p class="text-base md:text-lg text-gray-200 mb-8 max-w-lg mx-auto md:mx-0">Acquire the creative edge at
+                    India's premier design institute. We bridge the gap between local talent and global industry
+                    standards.</p>
+                <div
+                    class="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#courses"
+                        class="bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-red-600 hover:text-white transition text-center">Explore
+                        Courses</a>
+                    <button onclick="document.getElementById('inquiry-modal').classList.remove('hidden')"
+                        class="border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-black transition text-center">Inquire
+                        Now</button>
                 </div>
             </div>
-            
-            <!-- Quick Inquiry Form (Hidden on mobile hero for cleaner look, accessible via scroll/nav) -->
+
+            <!-- Quick Inquiry Form -->
             <div class="hidden md:block bg-white p-8 rounded-2xl shadow-2xl floating-form">
                 <h3 class="text-2xl font-bold mb-6 text-gray-800">Reserve Your Seat</h3>
                 <form id="hero-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-4">
                     <input type="hidden" name="access_key" value="cc56a590-3dc9-42fb-b227-985e4dc02488">
                     <input type="hidden" name="subject" value="New Admission Inquiry - INSD Jammu">
-                    <input type="text" name="name" placeholder="Full Name" required class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
-                    <input type="email" name="email" placeholder="Email Address" required class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
-                    <input type="tel" name="phone" placeholder="Phone Number" required class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
-                    <select name="course" required class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                    <input type="text" name="name" placeholder="Full Name" required
+                        class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                    <input type="email" name="email" placeholder="Email Address" required
+                        class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                    <input type="tel" name="phone" placeholder="Phone Number" required
+                        class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                    <select name="course" required
+                        class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
                         <option value="" disabled selected>Select Course</option>
                         <option value="Fashion">Fashion Design</option>
                         <option value="Interior">Interior Design</option>
                         <option value="Graphic">Graphic Design</option>
-                        <option value="Animation">Animation</option>
+                        <option value="Animation">Animation & VFX</option>
+                        <option value="Jewellery">Jewellery Design</option>
+                        <option value="Photography">Photography</option>
                     </select>
-                    <button type="submit" id="submit-btn" class="w-full bg-red-600 text-white py-4 rounded-lg font-bold hover:bg-black transition">
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-red-600 text-white py-4 rounded-lg font-bold hover:bg-black transition">
                         Submit Application
                     </button>
                     <div id="form-status" class="hidden text-center p-3 rounded-lg text-sm"></div>
@@ -123,28 +200,32 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 <div class="text-center p-4">
-                    <div class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                    <div
+                        class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
                         <i class="fa-solid fa-certificate text-red-600 text-xl md:text-2xl"></i>
                     </div>
                     <h4 class="font-bold text-sm md:text-base mb-2">UGC Recognized</h4>
                     <p class="text-xs md:text-sm text-gray-600">Global recognition.</p>
                 </div>
                 <div class="text-center p-4">
-                    <div class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                    <div
+                        class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
                         <i class="fa-solid fa-briefcase text-red-600 text-xl md:text-2xl"></i>
                     </div>
                     <h4 class="font-bold text-sm md:text-base mb-2">Live Projects</h4>
                     <p class="text-xs md:text-sm text-gray-600">Practical focus.</p>
                 </div>
                 <div class="text-center p-4">
-                    <div class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                    <div
+                        class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
                         <i class="fa-solid fa-globe text-red-600 text-xl md:text-2xl"></i>
                     </div>
                     <h4 class="font-bold text-sm md:text-base mb-2">Global Tours</h4>
                     <p class="text-xs md:text-sm text-gray-600">World exposure.</p>
                 </div>
                 <div class="text-center p-4">
-                    <div class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                    <div
+                        class="w-12 h-12 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
                         <i class="fa-solid fa-user-tie text-red-600 text-xl md:text-2xl"></i>
                     </div>
                     <h4 class="font-bold text-sm md:text-base mb-2">Expert Faculty</h4>
@@ -165,7 +246,9 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Fashion Design -->
                 <div class="group relative overflow-hidden rounded-3xl h-[400px] md:h-[450px] shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110" alt="Fashion Design Studio">
+                    <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&q=80&w=800"
+                        class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                        alt="Fashion Design Studio">
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                     <div class="absolute bottom-0 p-6 md:p-8 text-white">
                         <h3 class="text-2xl font-bold mb-2">Fashion Design</h3>
@@ -175,7 +258,9 @@
 
                 <!-- Interior Design -->
                 <div class="group relative overflow-hidden rounded-3xl h-[400px] md:h-[450px] shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110" alt="Interior">
+                    <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=800"
+                        class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                        alt="Interior">
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                     <div class="absolute bottom-0 p-6 md:p-8 text-white">
                         <h3 class="text-2xl font-bold mb-2">Interior Design</h3>
@@ -185,11 +270,52 @@
 
                 <!-- Graphic Design -->
                 <div class="group relative overflow-hidden rounded-3xl h-[400px] md:h-[450px] shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110" alt="Graphic">
+                    <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800"
+                        class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                        alt="Graphic">
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                     <div class="absolute bottom-0 p-6 md:p-8 text-white">
                         <h3 class="text-2xl font-bold mb-2">Graphic Design</h3>
                         <p class="text-sm opacity-80">Visual communication, branding, and UI/UX design.</p>
+                    </div>
+                </div>
+
+                <!-- Animation -->
+                <div class="group relative overflow-hidden rounded-3xl h-[400px] md:h-[450px] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800"
+                        class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                        alt="Animation">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    <div class="absolute bottom-0 p-6 md:p-8 text-white">
+                        <h3 class="text-2xl font-bold mb-2">Animation & VFX</h3>
+                        <p class="text-sm opacity-80">Bring characters to life with 2D/3D animation and visual effects.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Jewellery Design -->
+                <div class="group relative overflow-hidden rounded-3xl h-[400px] md:h-[450px] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800"
+                        class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                        alt="Jewellery Design">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    <div class="absolute bottom-0 p-6 md:p-8 text-white">
+                        <h3 class="text-2xl font-bold mb-2">Jewellery Design</h3>
+                        <p class="text-sm opacity-80">Craft luxury ornaments and learn the intricacies of gemmology and
+                            international luxury market trends.</p>
+                    </div>
+                </div>
+
+                <!-- Photography -->
+                <div class="group relative overflow-hidden rounded-3xl h-[400px] md:h-[450px] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800"
+                        class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                        alt="Photography">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    <div class="absolute bottom-0 p-6 md:p-8 text-white">
+                        <h3 class="text-2xl font-bold mb-2">Photography</h3>
+                        <p class="text-sm opacity-80">Master lighting, composition, and professional digital imaging.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -199,7 +325,9 @@
     <!-- Placement Partners -->
     <section id="placements" class="py-16 bg-white overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <h2 class="text-2xl md:text-3xl font-bold mb-8">Our Alumni Work With</h2>
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">Launch Your Global Career</h2>
+            <p class="text-gray-600 mb-8 max-w-2xl mx-auto">We provide dedicated placement support and career counseling
+                to help our students secure opportunities with top national and international design houses.</p>
             <div class="flex flex-wrap justify-center gap-6 md:gap-12 grayscale opacity-60">
                 <span class="text-lg md:text-2xl font-bold italic">JJ VALAYA</span>
                 <span class="text-lg md:text-2xl font-bold italic">BENETTON</span>
@@ -216,14 +344,18 @@
                 <h2 class="text-3xl font-bold mb-6">INSD <span class="text-red-600">JAMMU</span></h2>
                 <p class="text-gray-400 mb-6 max-w-sm">Join us to transform your passion into a global career.</p>
                 <div class="flex space-x-4">
-                    <a href="#" class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-red-600 transition"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-red-600 transition"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#"
+                        class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-red-600 transition"><i
+                            class="fa-brands fa-instagram"></i></a>
+                    <a href="#"
+                        class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-red-600 transition"><i
+                            class="fa-brands fa-facebook-f"></i></a>
                 </div>
             </div>
             <div>
                 <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Contact Us</h4>
                 <p class="text-gray-400 mb-2 font-bold text-white">Campus Address:</p>
-                <p class="text-gray-400 mb-4">3rd Floor, 13, Sector 5-A, Main road, Trikuta Nagar, Jammu</p>
+                <p class="text-gray-400 mb-4">3rd Floor, 13, Sector 5-A, Main Road, Trikuta Nagar, Jammu</p>
                 <p class="text-gray-400 mb-2 font-bold text-white">Call:</p>
                 <p class="text-gray-400 font-bold text-lg text-red-500">+91 9682334087</p>
             </div>
@@ -234,6 +366,24 @@
     </footer>
 
     <script>
+        // Modal Logic
+        const modal = document.getElementById('inquiry-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        // Show modal after 1 seconds
+        window.onload = function () {
+            setTimeout(() => {
+                if (!localStorage.getItem('insd_modal_shown')) {
+                    modal.classList.remove('hidden');
+                }
+            }, 1000);
+        };
+
+        closeModal.onclick = function () {
+            modal.classList.add('hidden');
+            localStorage.setItem('insd_modal_shown', 'true');
+        };
+
         // Mobile Menu Toggle Logic
         const menuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -243,30 +393,33 @@
             mobileMenu.classList.toggle('hidden');
         }
 
-        if(menuBtn) {
+        if (menuBtn) {
             menuBtn.addEventListener('click', toggleMenu);
         }
 
-        // Close menu when a link is clicked (crucial for SPA feel)
         mobileLinks.forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
             });
         });
 
-        // Form Handling
-        const form = document.getElementById('hero-form');
-        const status = document.getElementById('form-status');
-        const submitBtn = document.getElementById('submit-btn');
+        // Universal Form Handler
+        function handleFormSubmit(formId, statusId, submitBtnId) {
+            const form = document.getElementById(formId);
+            const status = document.getElementById(statusId);
+            const submitBtn = document.getElementById(submitBtnId);
 
-        if(form) {
-            form.addEventListener('submit', function(e) {
+            if (!form) return;
+
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 submitBtn.disabled = true;
-                submitBtn.innerText = "Sending...";
+                const originalBtnText = submitBtn.innerText;
+                submitBtn.innerText = "Processing...";
+
                 status.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
                 status.classList.add('bg-gray-100', 'text-gray-700', 'block');
-                status.innerText = "Please wait...";
+                status.innerText = "Submitting inquiry...";
 
                 const formData = new FormData(form);
                 const object = Object.fromEntries(formData);
@@ -277,27 +430,36 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: json
                 })
-                .then(async (response) => {
-                    let res = await response.json();
-                    if (response.status == 200) {
-                        status.className = "mt-4 text-center p-3 rounded-lg text-sm bg-green-100 text-green-700";
-                        status.innerText = "Success! We will contact you soon.";
-                        form.reset();
-                    } else {
-                        status.className = "mt-4 text-center p-3 rounded-lg text-sm bg-red-100 text-red-700";
-                        status.innerText = res.message || "Error occurred.";
-                    }
-                })
-                .catch(() => {
-                    status.className = "mt-4 text-center p-3 rounded-lg text-sm bg-red-100 text-red-700";
-                    status.innerText = "Connection error.";
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Submit Application";
-                });
+                    .then(async (response) => {
+                        let res = await response.json();
+                        if (response.status == 200) {
+                            status.className = "mt-4 text-center p-3 rounded-xl text-sm bg-green-100 text-green-700";
+                            status.innerText = "Success! Our counselor will call you shortly.";
+                            form.reset();
+                            if (formId === 'modal-form') {
+                                setTimeout(() => {
+                                    modal.classList.add('hidden');
+                                    localStorage.setItem('insd_modal_shown', 'true');
+                                }, 2000);
+                            }
+                        } else {
+                            status.className = "mt-4 text-center p-3 rounded-xl text-sm bg-red-100 text-red-700";
+                            status.innerText = res.message || "Error occurred.";
+                        }
+                    })
+                    .catch(() => {
+                        status.className = "mt-4 text-center p-3 rounded-xl text-sm bg-red-100 text-red-700";
+                        status.innerText = "Connection error. Please try again.";
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = originalBtnText;
+                    });
             });
         }
+
+        handleFormSubmit('hero-form', 'form-status', 'submit-btn');
+        handleFormSubmit('modal-form', 'modal-form-status', 'modal-submit-btn');
 
         window.addEventListener('scroll', () => {
             const nav = document.querySelector('nav');
@@ -309,4 +471,5 @@
         });
     </script>
 </body>
+
 </html>
